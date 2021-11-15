@@ -15,7 +15,7 @@ class Ydata:
     def currentPrice(self):
         url = f'https://finance.yahoo.com/quote/{self.symbol}/history?p={self.symbol}'
         content = r.get(url,headers=self.userAgent).text
-        price = content.split('class="Trsdu(0.3s)')[1].split('</span>')[0].split('">')[1]
+        price = content.split('class="Trsdu(0.3s)')[1].split('</span>')[0].split('">')[1].replace(',','')
         return self.__getNumber(price)
 
     def historical(self,initialDate:str,endDate:str):
@@ -72,6 +72,30 @@ class Ydata:
         if data: open(path,'w').write(json.dumps(data,indent=3))
         if os.path.exists(path): return json.loads(open(path,'r').read())
         else: return False
+
+    def chart(self,range:str='1d',interval:str='1m'):
+        # "validRanges":["1d","5d","1mo","3mo","ytd","max"]
+        yahooRequest= r.get(f'https://query2.finance.yahoo.com/v8/finance/chart/{self.symbol}?range={range}&interval={interval}',headers=self.userAgent)
+        if yahooRequest.status_code == 200:
+            yahooRequestJson=yahooRequest.json()['chart']['result'][0]
+            if 'timestamp' not in yahooRequestJson: return False
+            timeStamps = yahooRequestJson['timestamp']
+            indicators = yahooRequestJson['indicators']['quote'][0]
+            result,loopNum={},0
+            for timeStamp in timeStamps:
+                date = datetime.fromtimestamp(timeStamp).strftime('%Y-%m-%d %I:%M:00')
+                # if values are empty skip this time
+                if indicators['open'][loopNum] == None: loopNum=loopNum+1 ; continue
+                result[date]={
+                    'open':indicators['open'][loopNum],
+                    'close':indicators['close'][loopNum],
+                    'low':indicators['low'][loopNum],
+                    'high':indicators['high'][loopNum],
+                    'volume':indicators['volume'][loopNum]
+                }
+                loopNum=loopNum+1
+            return result
+        else:return False
     
     def __getNumber(self,number:str):
         if '.' in number: return float(number)

@@ -12,15 +12,15 @@ classifiers = [
 
 setup(
     name='ydata',
-    version='0.0.1',
-    description='Get stock information, price and historical data from yahoo finance.',
-    long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
+    version='0.2',
+    description='Download stock symbol historical data from yahoo finance.',
+    long_description='Download stock symbol historical data from yahoo finance in a json format (dictionary) beginners friendly.',
     url='https://github.com/anthony16t/ydata',  
     author='anthony16t',
     author_email='info@anthony16t.com',
     license='MIT', 
     classifiers=classifiers,
-    keywords=['yahoo','stock','market'], 
+    keywords=['stock','finance','market'], 
     packages=find_packages(),
     install_requires=['requests','python-dateutil']
 )
